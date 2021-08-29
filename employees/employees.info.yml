@@ -1,0 +1,6 @@
+name: Employees
+description: Custom module to handle employees list
+package: Custom
+
+type: module
+core: 8.x

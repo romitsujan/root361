@@ -1,0 +1,14 @@
+# node.type.employees.yml
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - employees
+name: 'Employees'
+type: employees
+description: 'Content type contains employees details'
+help: 'Employee Details'
+new_revision: false
+preview_mode: 1
+display_submitted: true
