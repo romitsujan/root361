@@ -157,6 +157,18 @@ function employees_uninstall()
 	$check=FieldConfig::loadByName('node', 'employees', 'employee_designation');
 	if(!empty($check))
 		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_full_name');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_full_name');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_phone');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_phone');
+	if(!empty($check))
+		$check->delete();
 	$check=FieldStorageConfig::loadByName('node', 'employee_month_year');
 	if(!empty($check))
 		$check->delete();
@@ -184,11 +196,11 @@ function employees_node_form_validate($form, FormState $form_state) {
   if ($node->getType() == 'employees') {
 	//print_r($form_state->getValue('employee_month_year'));exit;
    $month_year=$form_state->getValue('employee_month_year');
-print_r($month_year);exit;
-	$mon=$month_year[0]['value']->format('m-Y');
+//print_r($month_year);exit;
+	$mon=$month_year[0]['value']->format('Y-m');
 	$shift=$form_state->getValue('employee_shift');
 	
-	$query = \Drupal::entityQuery('node')->condition('type', 'employees')->condition('employee_month_year', '%-'.$mon,'like')->condition('employee_shift',$shift[0]['target_id']);
+	$query = \Drupal::entityQuery('node')->condition('type', 'employees')->condition('employee_month_year', $mon.'-%','like')->condition('employee_shift',$shift[0]['target_id']);
 	$results = $query->execute();
 	//print_r($results);exit;
 	if(count($results)>=2)
