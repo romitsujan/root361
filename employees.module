@@ -1,0 +1,214 @@
+<?php
+
+use Drupal\taxonomy\Entity\Term;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Core\Form\FormState;
+
+
+function employees_install()
+{
+	FieldStorageConfig::create(array(
+		  'field_name' => 'employee_designation',
+		  'entity_type' => 'node',
+		  'type' => 'string',
+		  'cardinality' => 1,
+		'persist_with_no_fields'=>false,
+		'status'=>true,
+		
+		))->save();
+
+	FieldConfig::create([
+	  'field_name' => 'employee_designation',
+	  'entity_type' => 'node',
+	  'bundle' => 'employees',
+	  'label' => 'Designation',
+	
+	])->save();
+	
+FieldStorageConfig::create(array(
+		  'field_name' => 'employee_full_name',
+		  'entity_type' => 'node',
+		  'type' => 'string',
+		  'cardinality' => 1,
+		'persist_with_no_fields'=>false,
+		'status'=>true,
+		
+		))->save();
+
+	FieldConfig::create([
+	  'field_name' => 'employee_full_name',
+	  'entity_type' => 'node',
+	  'bundle' => 'employees',
+	  'label' => 'Full Name',
+	
+	])->save();
+
+FieldStorageConfig::create(array(
+		  'field_name' => 'employee_phone',
+		  'entity_type' => 'node',
+		  'type' => 'string',
+		  'cardinality' => 1,
+		'persist_with_no_fields'=>false,
+		'status'=>true,
+		
+		))->save();
+
+	FieldConfig::create([
+	  'field_name' => 'employee_phone',
+	  'entity_type' => 'node',
+	  'bundle' => 'employees',
+	  'label' => 'Phone Number',
+	
+	])->save();
+
+
+	FieldStorageConfig::create(array(
+		  'field_name' => 'employee_month_year',
+		  'entity_type' => 'node',
+		  'type' => 'datetime',
+		  'cardinality' => 1,
+		'persist_with_no_fields'=>false,
+		'status'=>true,
+		
+	'settings' => [
+	       'datetime-type' => 'date', // Ex: node, taxonomy_term.
+	     ],
+		))->save();
+
+	FieldConfig::create([
+	  'field_name' => 'employee_month_year',
+	  'entity_type' => 'node',
+	  'bundle' => 'employees',
+	  'label' => 'Month Year',
+	])->save();
+
+	  $vid = "employees-shift";
+    $name = "Employees Shift";
+    $vocabularies =Vocabulary::loadMultiple();
+    if (!isset($vocabularies[$vid])) {
+      $vocabulary = Vocabulary::create(array(
+            'vid' => $vid,
+            'description' => '',
+            'name' => $name,
+      ));
+      $vocabulary->save();
+    }
+    else {
+      // Vocabulary Already exist
+      $query = \Drupal::entityQuery('taxonomy_term');
+      $query->condition('vid', $vid);
+      $tids = $query->execute();
+    }
+
+	$new_term=Term::create(['name' => ' Shift 1','vid' => $vid]);
+	 $new_term->save();
+	$new_term=Term::create(['name' => ' Shift 2','vid' => $vid]);
+	 $new_term->save();
+	$new_term=Term::create(['name' => ' Shift 3','vid' => $vid]);
+	 $new_term->save();
+
+  // Save the taxonomy term.
+  $new_term->save();
+
+  // Return the taxonomy term id.{
+ // return $new_term->id();
+
+ FieldStorageConfig::create([
+     'field_name' => 'employee_shift',
+     'entity_type' => 'node',
+     'type' => 'entity_reference',
+     'cardinality' => 1,
+	'persist_with_no_fields'=>false,
+	'status'=>true,
+	
+
+     // Optional to target entity types.
+     'settings' => [
+       'target_type' => 'taxonomy_term', // Ex: node, taxonomy_term.
+     ],
+   ])->save();
+
+	FieldConfig::create([
+  'field_name' => 'employee_shift',
+  'entity_type' => 'node',
+  'bundle' => 'employees',
+  'label' => 'Shift',
+  'cardinality' => -1,
+
+  // Optional to target bundles.
+  'settings' => [
+    'handler' => 'default',
+    'handler_settings' => [
+      'target_bundles' => ['employees-shift'
+      ],
+    ],
+  ],
+])->save();				
+	
+}
+
+function employees_uninstall()
+{
+	$check=FieldStorageConfig::loadByName('node', 'employee_designation');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_designation');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_full_name');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_full_name');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_phone');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_phone');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_month_year');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_month_year');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldStorageConfig::loadByName('node', 'employee_shift');
+	if(!empty($check))
+		$check->delete();
+	$check=FieldConfig::loadByName('node', 'employees', 'employee_shift');
+	if(!empty($check))
+		$check->delete();
+	$check=Vocabulary::load('employees-shift');
+	if(!empty($check))
+		$check->delete();
+}
+
+function employees_form_node_form_alter(&$form, FormState $form_state) {
+  $form['#validate'][] = 'employees_node_form_validate';
+}
+
+function employees_node_form_validate($form, FormState $form_state) {
+  $node = $form_state->getFormObject()->getEntity();
+
+  if ($node->getType() == 'employees') {
+	//print_r($form_state->getValue('employee_month_year'));exit;
+   $month_year=$form_state->getValue('employee_month_year');
+//print_r($month_year);exit;
+	$mon=$month_year[0]['value']->format('Y-m');
+	$shift=$form_state->getValue('employee_shift');
+	
+	$query = \Drupal::entityQuery('node')->condition('type', 'employees')->condition('employee_month_year', $mon.'-%','like')->condition('employee_shift',$shift[0]['target_id']);
+	$results = $query->execute();
+	//print_r($results);exit;
+	if(count($results)>=2)
+	{
+		 $form_state->setErrorByName('employee_shift', t('There are 2 employees under this shift in month'));
+		//exit('error');
+	}
+	
+  }
+}
+?>
